@@ -17,6 +17,8 @@ class ImapMail extends \Codeception\Module
 
     use \Codeception\Email\EmailServiceProvider;
 
+    use \Sparkcentral\Backoff\Backoff;
+
     /**
      * @var \Ddeboer\Imap\Server
      */
@@ -65,6 +67,10 @@ class ImapMail extends \Codeception\Module
         'imapFlags' => '',
         'deleteEmailsAfterScenario' => false,
         'inbox' => "INBOX",
+        'imapRetry' => [
+            'limit' => 5,
+            'timeout' => 10000000
+        ],
         # https://tools.ietf.org/html/rfc6154
         'specialUseMailboxes' => [
             "archive" => "Archive",
@@ -183,21 +189,15 @@ class ImapMail extends \Codeception\Module
      * Fetch Emails
      *
      * Accessible from tests, fetches all emails
+     * @param int $minimumExpectedMails If the returned number of emails is lower than this value, the fetching is retried after a delay
      */
-    public function fetchEmails()
+    public function fetchEmails($minimumExpectedMails = 1)
     {
-        $this->fetchedEmails = array();
+        $this->fetchedEmails = [];
 
         try
         {
-            // refresh the cache
-            $this->imapConnection->getResource()->clearLastMailboxUsedCache();
-            $messages = $this->inbox->getMessages();
-            if ($messages instanceof \ArrayIterator) {
-                $messages = iterator_to_array($messages);
-            }
-
-            $this->fetchedEmails = $messages;
+            $this->fetchedEmails = $this->_fetchEmailsFromInboxWithRetry($minimumExpectedMails);
         }
         catch(\Exception $e)
         {
@@ -206,6 +206,44 @@ class ImapMail extends \Codeception\Module
 
         // by default, work on all emails
         $this->setCurrentInbox($this->fetchedEmails);
+    }
+
+    /**
+     * Helper method
+     *
+     * @param int $minimumExpectedMails
+     * @return mixed
+     */
+    private function _fetchEmailsFromInboxWithRetry(int $minimumExpectedMails)
+    {
+        $result = $this->backoffOnCondition(
+            [$this, '_fetchEmailsFromInbox'],
+            [],
+            $this->config['imapRetry']['limit'],
+            function ($result) use ($minimumExpectedMails) {
+                return \count($result) >= $minimumExpectedMails;
+            },
+            $this->config['imapRetry']['timeout']
+        );
+
+        return $result;
+    }
+
+    /**
+     * Fetches mails from the inbox
+     *
+     * @return array|\Ddeboer\Imap\MessageIteratorInterface
+     */
+    private function _fetchEmailsFromInbox()
+    {
+        // refresh the cache
+        $this->imapConnection->getResource()->clearLastMailboxUsedCache();
+        $messages = $this->inbox->getMessages();
+        if ($messages instanceof \ArrayIterator) {
+            $messages = iterator_to_array($messages);
+        }
+
+        return $messages;
     }
 
     /**

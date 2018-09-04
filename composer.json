@@ -7,7 +7,8 @@
         "ext-json": "*",
         "codeception/codeception": "^2.3",
         "ericmartel/codeception-email": "^1.0",
-        "ddeboer/imap": "^1.5"
+        "ddeboer/imap": "^1.5",
+        "sparkcentral/backoff": "^1.1"
     },
     "authors": [
         {
