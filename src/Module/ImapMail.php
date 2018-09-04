@@ -2,8 +2,6 @@
 
 namespace Codeception\Module;
 
-use Zend\Mail\Storage\Imap;
-
 /***************************************************************
  *  Copyright notice
  *
@@ -56,12 +54,6 @@ class ImapMail extends \Codeception\Module
      */
     protected $fetchedEmails = [];
 
-
-    /**
-     * @var \Zend\Mail\Storage\Imap
-     */
-    protected $mailServer;
-
     /**
      * Codeception exposed variables
      *
@@ -72,7 +64,12 @@ class ImapMail extends \Codeception\Module
         # set this to /imap/ssl/novalidate-cert to ignore invalid ssl certs
         'imapFlags' => '',
         'deleteEmailsAfterScenario' => false,
-        'mailboxMapping' => [],
+        'inbox' => "INBOX",
+        # https://tools.ietf.org/html/rfc6154
+        'specialUseMailboxes' => [
+            "archive" => "Archive",
+            "junk" => "Junk"
+        ],
     );
 
     /**
@@ -93,8 +90,12 @@ class ImapMail extends \Codeception\Module
     {
         $this->server = new \Ddeboer\Imap\Server($this->config['imapServer'], $this->config['imapPort'], $this->config['imapFlags']);
         $this->imapConnection = $this->server->authenticate($this->config['imapUser'], $this->config['imapPassword']);
-        $this->inbox = $this->imapConnection->getMailbox('INBOX');
+        $this->inbox = $this->imapConnection->getMailbox($this->config['inbox']);
         $this->unreadInbox = $this->inbox;
+        // prepare archive folder if it doesn't exist
+        $this->prepareImapFolder($this->config['specialUseMailboxes']['archive']);
+        $this->archiveMailsFromFolder($this->config['inbox']);
+        $this->archiveMailsFromFolder($this->config['specialUseMailboxes']['junk']);
     }
 
     /**
@@ -109,6 +110,43 @@ class ImapMail extends \Codeception\Module
                 $this->deleteAllEmails();
             }
             $this->imapConnection->close();
+        }
+    }
+
+    /**
+     * @param string $imapFolder
+     */
+    protected function archiveMailsFromFolder($imapFolder)
+    {
+        $messages = $this->getAllMessagesFrom($imapFolder);
+        $archiveFolderName = $this->config['specialUseMailboxes']['archive'] . '.' . $imapFolder;
+        $archiveFolder = $this->prepareImapFolder($archiveFolderName);
+        foreach ($messages as $message) {
+            $message->move($archiveFolder);
+        }
+    }
+
+
+    /**
+     * @param string $imapFolder
+     * @return \Ddeboer\Imap\MessageIteratorInterface
+     */
+    protected function getAllMessagesFrom($imapFolder)
+    {
+        $folder = $this->imapConnection->getMailbox($imapFolder);
+        return $folder->getMessages();
+    }
+
+    /**
+     * @param string $imapFolder
+     * @return \Ddeboer\Imap\MailboxInterface
+     */
+    protected function prepareImapFolder($imapFolder)
+    {
+        if ($this->imapConnection->hasMailbox($imapFolder)) {
+            return $this->imapConnection->getMailbox($imapFolder);
+        } else {
+            return $this->imapConnection->createMailbox($imapFolder);
         }
     }
 
