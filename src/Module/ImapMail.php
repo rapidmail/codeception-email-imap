@@ -2,8 +2,6 @@
 
 namespace Codeception\Module;
 
-use Zend\Mail\Storage\Imap;
-
 /***************************************************************
  *  Copyright notice
  *
@@ -55,12 +53,6 @@ class ImapMail extends \Codeception\Module
      * @var \Ddeboer\Imap\MessageIteratorInterface
      */
     protected $fetchedEmails = [];
-
-
-    /**
-     * @var \Zend\Mail\Storage\Imap
-     */
-    protected $mailServer;
 
     /**
      * Codeception exposed variables
@@ -137,6 +129,7 @@ class ImapMail extends \Codeception\Module
             $message->delete();
         }
         $this->imapConnection->expunge();
+        $this->imapConnection->getResource()->clearLastMailboxUsedCache();
     }
 
     /**
@@ -150,6 +143,8 @@ class ImapMail extends \Codeception\Module
 
         try
         {
+            // refresh the cache
+            $this->imapConnection->getResource()->clearLastMailboxUsedCache();
             $messages = $this->inbox->getMessages();
             if ($messages instanceof \ArrayIterator) {
                 $messages = iterator_to_array($messages);
