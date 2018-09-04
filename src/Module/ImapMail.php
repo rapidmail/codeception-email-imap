@@ -92,8 +92,9 @@ class ImapMail extends \Codeception\Module
         $this->imapConnection = $this->server->authenticate($this->config['imapUser'], $this->config['imapPassword']);
         $this->inbox = $this->imapConnection->getMailbox($this->config['inbox']);
         $this->unreadInbox = $this->inbox;
-        // prepare archive folder if it doesn't exist
+        // prepare archive and junk folder if it doesn't exist
         $this->prepareImapFolder($this->config['specialUseMailboxes']['archive']);
+        $this->prepareImapFolder($this->config['specialUseMailboxes']['junk']);
         $this->archiveMailsFromFolder($this->config['inbox']);
         $this->archiveMailsFromFolder($this->config['specialUseMailboxes']['junk']);
     }
