@@ -232,6 +232,39 @@ class ImapMail extends \Codeception\Module
         $this->setCurrentInbox($inboxForAddress);
     }
 
+
+    /**
+     * checks for spam score
+     * could use several methods, e.g. SpamAssassin
+     *
+     * @return void
+     */
+    public function seeNoRelevantSpamScore()
+    {
+        $this->checkSpamAssassinSpamStatus($this->openedEmail->getRawHeaders());
+    }
+
+    /**
+     * Checks the X-Spam-Status for occurence of "Yes" and returns false if so
+     * We have to check the raw headers since the imap library has no
+     * proper method for checking any other way
+     *
+     * @param string $rawHeaders
+     * @return bool
+     */
+    protected function checkSpamAssassinSpamStatus($rawHeaders)
+    {
+        preg_match_all("/^([^\r\n:]+)\s*[:]\s*([^\r\n:]+(?:[\r]?[\n][ \t][^\r\n]+)*)/m", $rawHeaders, $matches);
+
+        $headerKeys = $matches[1];
+        $headerValues = $matches[2];
+        $spamAssassinSpamStatusKey = 'X-Spam-Status';
+        if (in_array($spamAssassinSpamStatusKey,$headerKeys)) {
+            $headerKey = array_search($spamAssassinSpamStatusKey,$headerKeys);
+            $this->assertStringStartsWith("No", $headerValues[$headerKey], 'Your mail is liable to end up in spam folder, since X-Spam-Status contains the following: ' . $headerValues[$headerKey]);
+        }
+    }
+
     /**
      * Iterates of an array of recipients and checks if the address matches
      *
