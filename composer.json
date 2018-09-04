@@ -4,6 +4,7 @@
     "license": "OSL-3",
     "type": "library",
     "require": {
+        "ext-json": "*",
         "codeception/codeception": "^2.3",
         "ericmartel/codeception-email": "^1.0",
         "ddeboer/imap": "^1.2"
