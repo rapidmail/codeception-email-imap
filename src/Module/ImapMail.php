@@ -2,8 +2,6 @@
 
 namespace Codeception\Module;
 
-use Zend\Mail\Storage\Imap;
-
 /***************************************************************
  *  Copyright notice
  *
@@ -55,12 +53,6 @@ class ImapMail extends \Codeception\Module
      * @var \Ddeboer\Imap\MessageIteratorInterface
      */
     protected $fetchedEmails = [];
-
-
-    /**
-     * @var \Zend\Mail\Storage\Imap
-     */
-    protected $mailServer;
 
     /**
      * Codeception exposed variables
