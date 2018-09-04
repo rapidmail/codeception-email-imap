@@ -30,6 +30,12 @@ modules:
           # required
           imapServer: mail.example.org
           
+          # optional, defaults to 5 retries and an initial wait of 10000000 microseconds (10 seconds) 
+          # beware, the usleep is called exponentially and you need to configure BOTH values, due to yaml merging 
+          imapRetry:
+            limit: 3
+            wait: 2000
+          
           # optional, defaults to 143, set the proper port, e.g. 993 for TLS
           imapPort: 993
           # optional, pass flags to the imap connection, e.g. to disable validity check of the ssl cert

@@ -69,7 +69,7 @@ class ImapMail extends \Codeception\Module
         'inbox' => "INBOX",
         'imapRetry' => [
             'limit' => 5,
-            'timeout' => 10000000
+            'wait' => 10000000
         ],
         # https://tools.ietf.org/html/rfc6154
         'specialUseMailboxes' => [
@@ -223,7 +223,7 @@ class ImapMail extends \Codeception\Module
             function ($result) use ($minimumExpectedMails) {
                 return \count($result) >= $minimumExpectedMails;
             },
-            $this->config['imapRetry']['timeout']
+            $this->config['imapRetry']['wait']
         );
 
         return $result;
