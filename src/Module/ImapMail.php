@@ -385,10 +385,12 @@ class ImapMail extends \Codeception\Module
      */
     protected function getEmailBody($email)
     {
-        if ($email->getBodyHtml())
+        $body = '';
+        if ($email->getBodyHtml()) {
+            $body = $email->getBodyHtml();
+            $body .= "\n\n";
+        }
 
-        $body = $email->getBodyHtml();
-        $body .= "\n\n";
         $body .= $email->getBodyText();
 
         return $body;
