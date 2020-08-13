@@ -5,7 +5,7 @@
     "type": "library",
     "require": {
         "ext-json": "*",
-        "codeception/codeception": "^2.3",
+        "codeception/codeception": "^4.1",
         "ericmartel/codeception-email": "^1.0",
         "ddeboer/imap": "^1.5",
         "sparkcentral/backoff": "^1.1"
