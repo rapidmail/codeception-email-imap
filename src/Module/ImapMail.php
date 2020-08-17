@@ -85,6 +85,17 @@ class ImapMail extends \Codeception\Module
      */
     protected $requiredFields = array('imapUser', 'imapPassword', 'imapServer');
 
+    /**
+     * @return string
+     */
+    public function grabRawMessage()
+    {
+        if (!$this->openedEmail instanceof \Ddeboer\Imap\Message) {
+            return '';
+        }
+
+        return $this->openedEmail->getRawMessage();
+    }
 
     /**
      * @param \Codeception\TestInterface $test
