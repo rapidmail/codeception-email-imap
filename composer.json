@@ -5,9 +5,10 @@
     "type": "library",
     "require": {
         "ext-json": "*",
-        "codeception/codeception": "^4.1",
+        "ext-imap": "*",
+        "codeception/codeception": "^5.0",
         "ericmartel/codeception-email": "^1.0",
-        "ddeboer/imap": "^1.5",
+        "ddeboer/imap": "^1.18",
         "sparkcentral/backoff": "^1.1"
     },
     "authors": [
