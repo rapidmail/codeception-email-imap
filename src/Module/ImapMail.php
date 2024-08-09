@@ -61,7 +61,7 @@ class ImapMail extends \Codeception\Module
      *
      * @var array
      */
-    protected $config = array(
+    protected array $config = array(
         'imapPort' => 143,
         # set this to /imap/ssl/novalidate-cert to ignore invalid ssl certs
         'imapFlags' => '',
@@ -83,7 +83,7 @@ class ImapMail extends \Codeception\Module
      *
      * @var array
      */
-    protected $requiredFields = array('imapUser', 'imapPassword', 'imapServer');
+    protected array $requiredFields = array('imapUser', 'imapPassword', 'imapServer');
 
     /**
      * @return string
